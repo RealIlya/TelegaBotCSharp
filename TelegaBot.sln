@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelegaBot", "TelegaBot\TelegaBot.csproj", "{D2766AC1-02EA-4CA5-89A9-08F6A6F2AB71}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D2766AC1-02EA-4CA5-89A9-08F6A6F2AB71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2766AC1-02EA-4CA5-89A9-08F6A6F2AB71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2766AC1-02EA-4CA5-89A9-08F6A6F2AB71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2766AC1-02EA-4CA5-89A9-08F6A6F2AB71}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
