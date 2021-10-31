@@ -19,3 +19,6 @@ C:\Users\Admin\Desktop\DON'T DELETE\inventions\C sharp\TelegaBot\TelegaBot\bin\D
 C:\Users\Admin\Desktop\DON'T DELETE\inventions\C sharp\TelegaBot\TelegaBot\bin\Debug\Telegram.Bot.Extensions.Polling.xml
 C:\Users\Admin\Desktop\DON'T DELETE\inventions\C sharp\TelegaBot\TelegaBot\bin\Debug\Telegram.Bot.pdb
 C:\Users\Admin\Desktop\DON'T DELETE\inventions\C sharp\TelegaBot\TelegaBot\bin\Debug\Telegram.Bot.Extensions.Polling.pdb
+C:\Users\Admin\Desktop\DON'T DELETE\inventions\C sharp\TelegaBot\TelegaBot\bin\Debug\HtmlAgilityPack.dll
+C:\Users\Admin\Desktop\DON'T DELETE\inventions\C sharp\TelegaBot\TelegaBot\bin\Debug\HtmlAgilityPack.pdb
+C:\Users\Admin\Desktop\DON'T DELETE\inventions\C sharp\TelegaBot\TelegaBot\bin\Debug\HtmlAgilityPack.xml

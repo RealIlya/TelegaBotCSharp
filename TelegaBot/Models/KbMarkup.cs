@@ -29,11 +29,11 @@ namespace TelegaBot.Models
             return null;
         }
 
-        public async Task<Message> EditKeyboardMarkup(CallbackQuery callbackQuery)
+        public async Task<Message> EditKeyboardMarkup(CallbackQuery callbackQuery, string text,
+            InlineKeyboardMarkup replyMarkup)
         {
-            return await Client.EditMessageTextAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId,
-                _text,
-                replyMarkup: _keyboardMarkup,
+            return await Client.EditMessageTextAsync(callbackQuery.Message.Chat.Id, _messageId, text,
+                replyMarkup: replyMarkup,
                 parseMode: ParseMode.Html);
         }
 

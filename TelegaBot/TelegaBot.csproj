@@ -12,7 +12,7 @@
         <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
         <LangVersion>9</LangVersion>
-        <Nullable>enable</Nullable>
+        <Nullable>disable</Nullable>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -34,6 +34,10 @@
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
+        <Reference Include="HtmlAgilityPack, Version=1.11.37.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a">
+          <HintPath>..\packages\HtmlAgilityPack.1.11.37\lib\Net45\HtmlAgilityPack.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
         <Reference Include="mscorlib" />
         <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
           <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -94,11 +98,16 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="BotStuff\GlobalConstants.cs" />
+        <Compile Include="BotStuff\MarkupConstructor.cs" />
+        <Compile Include="BotStuff\Announcement.cs" />
         <Compile Include="BotStuff\Handlers.cs" />
-        <Compile Include="BotStuff\Commands.cs" />
-        <Compile Include="BotStuff\ICommands.cs" />
-        <Compile Include="BotStuff\Timetable.cs" />
         <Compile Include="BotStuff\Utilities.cs" />
+        <Compile Include="Commands\HomeworkCommands.cs" />
+        <Compile Include="Commands\ICommands.cs" />
+        <Compile Include="Commands\OtherCommands.cs" />
+        <Compile Include="Commands\TimetableCommands.cs" />
+        <Compile Include="Models\Homework.cs" />
         <Compile Include="Models\KbMarkup.cs" />
         <Compile Include="Models\Student.cs" />
         <Compile Include="Program.cs" />
