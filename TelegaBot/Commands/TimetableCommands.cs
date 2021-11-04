@@ -99,11 +99,10 @@ namespace TelegaBot.Commands
                     where room.Name == rsg.ToString()
                     select _timetable["ROOMS"][room.Name].ToString()).ToList();
 
-                // if ((lesson - 1) % 2 == 0) result += $"<b>Пара {lesson / 2 + 1}</b>\n";
+                if ((lesson - 1) % 2 == 0) result += $"<b>Пара {lesson / 2 + 1}</b>\n";
 
                 result +=
-                    (((lesson - 1) % 2 == 0) ? $"<b>Пара {lesson / 2 + 1}</b>\n {lesson++}" : lesson++) +
-                    $". {string.Join(" / ", subjects)}({string.Join(" / ", rooms)})\n" +
+                    $"{lesson++}. {string.Join(" / ", subjects)}({string.Join(" / ", rooms)})\n" +
                     $"    {string.Join(" / ", teachers)}\n";
                 flag = false;
             }
