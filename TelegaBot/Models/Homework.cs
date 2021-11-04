@@ -23,13 +23,5 @@
         {
             return $"{Date}, {DayOfWeek}, {Subject}, {MessageId}";
         }
-
-        public void Deconstruct(out string subject, out string dayOfWeek, out string date, out int messageId)
-        {
-            subject = Subject;
-            dayOfWeek = DayOfWeek;
-            date = Date;
-            messageId = MessageId;
-        }
     }
 }

@@ -22,23 +22,33 @@ namespace TelegaBot.BotStuff
                 }
             }
 
-            if (optionalButtons != null)
-                foreach (var item in optionalButtons)
-                {
-                    keyboard.Add(new List<InlineKeyboardButton>()
-                        { InlineKeyboardButton.WithCallbackData(item.Value, item.Key) });
-                }
+            if (optionalButtons != null) 
+                AddOptionalButtons(keyboard, optionalButtons);
 
             keyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.WithCallbackData("Закрыть", "close") });
-
             return new InlineKeyboardMarkup(keyboard);
         }
 
-        public static InlineKeyboardMarkup CreateMarkup()
+        public static InlineKeyboardMarkup CreateMarkup(Dictionary<string, string> optionalButtons = null)
         {
-            var keyboard = new List<List<InlineKeyboardButton>>
-                { new() { InlineKeyboardButton.WithCallbackData("Закрыть", "close") } };
+            var keyboard = new List<List<InlineKeyboardButton>>();
+
+            if (optionalButtons != null) 
+                AddOptionalButtons(keyboard, optionalButtons);
+
+            keyboard.Add(new List<InlineKeyboardButton>()
+                { InlineKeyboardButton.WithCallbackData("Закрыть", "close") });
             return new InlineKeyboardMarkup(keyboard);
+        }
+
+        private static void AddOptionalButtons(ICollection<List<InlineKeyboardButton>> keyboard,
+            Dictionary<string, string> optionalButtons)
+        {
+            foreach (var item in optionalButtons)
+            {
+                keyboard.Add(new List<InlineKeyboardButton>()
+                    { InlineKeyboardButton.WithCallbackData(item.Value, item.Key) });
+            }
         }
     }
 }

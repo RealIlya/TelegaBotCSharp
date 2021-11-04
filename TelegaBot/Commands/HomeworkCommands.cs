@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -15,7 +13,7 @@ using File = System.IO.File;
 
 namespace TelegaBot.Commands
 {
-    public class HomeworkCommands
+    public class HomeworkCommands : GlobalConstants
     {
         private readonly ObservableCollection<Homework> _homeworks;
 
@@ -36,43 +34,45 @@ namespace TelegaBot.Commands
 
         #region Commands
 
-        public async Task<Message> ShowSubjectSelector(ITelegramBotClient client, Message message)
+        public async Task<Message> ShowSubjectSelector(ITelegramBotClient client, Message message,
+            ActionType actionType, bool deletePreviousMessage = false)
         {
             return await client.ToMessageAsync(message, "Выберите предмет:",
-                ActionType.Send, AnnouncementType.Regular,
-                keyboardMarkup: MarkupConstructor.CreateMarkup(4, 3, GlobalConstants.Subjects, "subject"));
+                actionType, AnnouncementType.Regular, deletePreviousMessage,
+                keyboardMarkup: MarkupConstructor.CreateMarkup(4, 3, Subjects, "subject"));
         }
 
-        public async Task<Message> ShowDayOfWeekSelector(ITelegramBotClient client, CallbackQuery callbackQuery)
+        public async Task<Message> ShowDayOfWeekSelector(ITelegramBotClient client, CallbackQuery callbackQuery,
+            ActionType actionType)
         {
             _notCheckedHomework = new Homework();
 
             var subjectNumber = int.Parse(callbackQuery.Data.Substring("subject".Length));
 
-            if (_homeworks.Any(homework => homework.Subject == GlobalConstants.Subjects[subjectNumber]))
+            if (_homeworks.Any(homework => homework.Subject == Subjects[subjectNumber]))
             {
-                _notCheckedHomework.Subject = GlobalConstants.Subjects[subjectNumber];
+                _notCheckedHomework.Subject = Subjects[subjectNumber];
                 return await client.ToMessageAsync(callbackQuery.Message, "Выберите день недели:",
-                    ActionType.Edit, AnnouncementType.Regular,
-                    keyboardMarkup: MarkupConstructor.CreateMarkup(3, 2, GlobalConstants.DayOfWeeks, "dayOfWeek",
-                        new Dictionary<string, string>() { { "dayOfWeek6", "Сегодня" } }));
+                    actionType, AnnouncementType.Regular,
+                    keyboardMarkup: MarkupConstructor.CreateMarkup(3, 2, DayOfWeeks, "dayOfWeek",
+                        new() { { "dayOfWeekBack", "К списку предметов" } }));
             }
 
             return await client.ToMessageAsync(callbackQuery.Message, "Ничего",
-                ActionType.Edit, AnnouncementType.Regular);
+                actionType, AnnouncementType.Regular,
+                keyboardMarkup: MarkupConstructor.CreateMarkup(
+                    new() { { "dayOfWeekBack", "К списку предметов" } }));
         }
 
-        public async Task<Message> ShowHomework(ITelegramBotClient client, CallbackQuery callbackQuery)
+        public async Task<Message> ShowHomework(ITelegramBotClient client, CallbackQuery callbackQuery,
+            ActionType actionType, bool deletePreviousMessage = false)
         {
             var dayOfWeekNumber = int.Parse(callbackQuery.Data.Substring("dayOfWeek".Length));
 
-            if (_homeworks.Any(homework => homework.DayOfWeek == GlobalConstants.DayOfWeeks[dayOfWeekNumber]))
+            if (_homeworks.Any(homework => homework.DayOfWeek == DayOfWeeks[dayOfWeekNumber]))
             {
-                _notCheckedHomework.DayOfWeek = GlobalConstants.DayOfWeeks[dayOfWeekNumber];
+                _notCheckedHomework.DayOfWeek = DayOfWeeks[dayOfWeekNumber];
             }
-
-            // var currentHomework = _homeworks.Where(homework => homework.Subject == _notCheckedSubject && homework.DayOfWeek == _notCheckedDayOfWeek)
-            //     .Select(homework => new List<string>() {homework.DayOfWeek, homework.Subject}).ToList().First();
 
             foreach (var homework in _homeworks)
             {
@@ -80,42 +80,47 @@ namespace TelegaBot.Commands
                     homework.DayOfWeek == _notCheckedHomework.DayOfWeek)
                 {
                     return await client.ToMessageAsync(callbackQuery.Message,
-                        $"Домашнее задание по {homework.Subject.Substring(0, homework.Subject.Length - 1) + "е"} за {homework.DayOfWeek}",
-                        ActionType.Send, AnnouncementType.Regular, true,
-                        replyToMessageId: homework.MessageId);
+                        $"Домашнее задание по {homework.Subject.Substring(0, homework.Subject.Length - 1) + "е"} за {homework.DayOfWeek.ToLower()}",
+                        actionType, AnnouncementType.Regular, deletePreviousMessage,
+                        replyToMessageId: homework.MessageId,
+                        keyboardMarkup: MarkupConstructor.CreateMarkup(
+                            new() { { "homeworkBack", "К началу" } }));
                 }
             }
 
-            return await client.ToMessageAsync(callbackQuery.Message, "Ничего",
-                ActionType.Edit, AnnouncementType.Regular);
+            return await client.ToMessageAsync(callbackQuery.Message,
+                "Ничего",
+                ActionType.EditText, AnnouncementType.Regular,
+                keyboardMarkup: MarkupConstructor.CreateMarkup(
+                    new() { { "homeworkBack", "К началу" } }));
         }
 
         public async Task<Message> ShowAllHomework(ITelegramBotClient client, Message message)
         {
-            return await client.ToMessageAsync(message, string.Join("\n", _homeworks),
-                ActionType.Send, AnnouncementType.Regular);
+            return await client.ToMessageAsync(message,
+                string.Join("\n", _homeworks),
+                ActionType.SendText, AnnouncementType.Regular);
         }
 
         public async Task<Message> NewHomework(ITelegramBotClient client, Message message, List<string> textList)
         {
             if (message.Photo == null || textList.Count < 2)
             {
-                return await client.ToMessageAsync(message, "Некорректный ввод",
-                    ActionType.Send, AnnouncementType.Error);
+                return await client.ToMessageAsync(message,
+                    "Некорректный ввод",
+                    ActionType.SendText, AnnouncementType.Error);
             }
 
-            if (!GlobalConstants.Subjects.Contains(textList.First().ToTitle()))
+            if (!Subjects.Contains(textList.First().ToTitle()))
             {
-                return await client.ToMessageAsync(message, "Предмет указан неправильно",
-                    ActionType.Send, AnnouncementType.Error);
+                return await client.ToMessageAsync(message,
+                    "Предмет указан неправильно",
+                    ActionType.SendText, AnnouncementType.Error);
             }
 
-            var presentDayOfWeek = (int)DateTime.Today.DayOfWeek == 0 ? 1 : (int)DateTime.Today.DayOfWeek;
-            
             var subject = textList.First().ToTitle();
-            var dayOfWeek = textList[1] != "н" ? textList[1] : GlobalConstants.DayOfWeeks[presentDayOfWeek - 1];
+            var dayOfWeek = textList.Middle() != "н" ? textList[1] : DayOfWeeks[Utilities.GetDayOfWeek() - 1];
             var date = textList.Last() != "н" ? textList.Last() : DateTime.Now.ToString($"d-M-yyyy");
-            // var date =  textList.Last() ?? DateTime.Now.ToString($"d-M-yyyy"); 
 
             _notCheckedHomework = new Homework(subject, dayOfWeek, date, message.MessageId);
 
@@ -133,10 +138,10 @@ namespace TelegaBot.Commands
         {
             _homeworks.Add(_notCheckedHomework);
 
-            await client.DeleteMessageAsync(callbackQuery.Message.Chat.Id, callbackQuery.Message.MessageId);
-
-            return await client.ToMessageAsync(callbackQuery.Message, "Сохранено",
-                ActionType.Send, AnnouncementType.Info);
+            return await client.ToMessageAsync(callbackQuery.Message,
+                "Сохранено",
+                ActionType.SendText, AnnouncementType.Info,
+                deletePreviousMessage: true);
         }
 
         #endregion

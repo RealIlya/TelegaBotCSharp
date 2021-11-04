@@ -17,8 +17,8 @@ namespace TelegaBot.BotStuff
 
     public enum ActionType
     {
-        Send,
-        Edit
+        SendText,
+        EditText
     }
 
     public static class Announcement
@@ -36,10 +36,10 @@ namespace TelegaBot.BotStuff
 
             var notification = actionType switch
             {
-                ActionType.Send => announcementType switch
+                ActionType.SendText => announcementType switch
                 {
-                    AnnouncementType.Error => client.SendTextMessageAsync(
-                        message.Chat.Id, $"<b><u>{text}</u></b>", replyMarkup: keyboardMarkup,
+                    AnnouncementType.Error => client.SendTextMessageAsync(message.Chat.Id,
+                        $"<b><u>{text}</u></b>", replyMarkup: keyboardMarkup,
                         replyToMessageId: replyToMessageId,
                         parseMode: ParseMode.Html),
                     AnnouncementType.Warning => client.SendTextMessageAsync(message.Chat.Id,
@@ -56,16 +56,16 @@ namespace TelegaBot.BotStuff
                         parseMode: ParseMode.Html),
                     _ => null
                 },
-                ActionType.Edit => announcementType switch
+                ActionType.EditText => announcementType switch
                 {
                     AnnouncementType.Error => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
-                        $"<b><u>{text}!</u></b>", replyMarkup: keyboardMarkup,
+                        $"<b><u>{text}</u></b>", replyMarkup: keyboardMarkup,
                         parseMode: ParseMode.Html),
                     AnnouncementType.Warning => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
-                        $"<b>{text}!</b>", replyMarkup: keyboardMarkup,
+                        $"<b>{text}</b>", replyMarkup: keyboardMarkup,
                         parseMode: ParseMode.Html),
                     AnnouncementType.Info => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
-                        $"<b>{text}.</b>", replyMarkup: keyboardMarkup,
+                        $"<b>{text}</b>", replyMarkup: keyboardMarkup,
                         parseMode: ParseMode.Html),
                     AnnouncementType.Regular => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
                         text, replyMarkup: keyboardMarkup,
