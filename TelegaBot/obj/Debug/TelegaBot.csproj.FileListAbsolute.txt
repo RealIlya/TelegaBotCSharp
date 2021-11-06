@@ -22,3 +22,7 @@ C:\Users\Admin\Desktop\DON'T DELETE\inventions\C sharp\TelegaBot\TelegaBot\bin\D
 C:\Users\Admin\Desktop\DON'T DELETE\inventions\C sharp\TelegaBot\TelegaBot\bin\Debug\HtmlAgilityPack.dll
 C:\Users\Admin\Desktop\DON'T DELETE\inventions\C sharp\TelegaBot\TelegaBot\bin\Debug\HtmlAgilityPack.pdb
 C:\Users\Admin\Desktop\DON'T DELETE\inventions\C sharp\TelegaBot\TelegaBot\bin\Debug\HtmlAgilityPack.xml
+C:\Users\Admin\Desktop\TelegaBot\TelegaBot\obj\Debug\TelegaBot.csproj.AssemblyReference.cache
+C:\Users\Admin\Desktop\TelegaBot\TelegaBot\obj\Debug\TelegaBot.csproj.CoreCompileInputs.cache
+C:\Users\Admin\Desktop\TelegaBot\TelegaBot\obj\Debug\TelegaBot.exe
+C:\Users\Admin\Desktop\TelegaBot\TelegaBot\obj\Debug\TelegaBot.pdb

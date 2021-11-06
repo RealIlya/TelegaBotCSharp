@@ -4,22 +4,15 @@ namespace TelegaBot.BotStuff
 {
     public abstract class GlobalConstants
     {
-        protected readonly List<string> DayOfWeeks;
+        protected static readonly List<string> DayOfWeeks = new() 
+            { "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье" };
 
-        protected readonly List<string> Subjects;
-
-        protected GlobalConstants()
+        protected static readonly List<string> Subjects = new()
         {
-            DayOfWeeks = new() 
-                { "Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье" };
-            
-            Subjects = new()
-            {
-                "Физика", "Математика", "Информатика",
-                "Рус.яз", "Англ.яз", "Литература",
-                "Химия", "Инженерная графика", "Биология",
-                "История", "Обществознание", "География"
-            };
-        }
+            "Физика", "Математика", "Информатика",
+            "Рус.яз", "Англ.яз", "Литература",
+            "Химия", "Инженерная графика", "Биология",
+            "История", "Обществознание", "География"
+        };
     }
 }

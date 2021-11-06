@@ -18,8 +18,6 @@ namespace TelegaBot
             var me = _client.GetMeAsync().Result;
             Console.Title = me.Username;
 
-            var activate = new Handlers();
-            
             using var cts = new CancellationTokenSource();
 
             _client.StartReceiving(new DefaultUpdateHandler(Handlers.HandleUpdateAsync, Handlers.HandleErrorAsync),

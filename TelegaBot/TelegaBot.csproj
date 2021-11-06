@@ -108,7 +108,6 @@
         <Compile Include="Commands\OtherCommands.cs" />
         <Compile Include="Commands\TimetableCommands.cs" />
         <Compile Include="Models\Homework.cs" />
-        <Compile Include="Models\KbMarkup.cs" />
         <Compile Include="Models\Student.cs" />
         <Compile Include="Program.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />

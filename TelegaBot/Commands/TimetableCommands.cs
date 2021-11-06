@@ -14,17 +14,17 @@ namespace TelegaBot.Commands
 {
     public class TimetableCommands : GlobalConstants
     {
-        private Dictionary<string, JToken> _timetable;
+        private static Dictionary<string, JToken> _timetable;
 
-        private string _lastActiveUri;
+        private static string _lastActiveUri;
 
-        public TimetableCommands()
+        static TimetableCommands()
         {
             _lastActiveUri = GetUri();
             _timetable = JsonConvert.DeserializeObject<Dictionary<string, JToken>>(GetTimetable());
         }
 
-        private string GetUri()
+        private static string GetUri()
         {
             var web = new HtmlWeb();
             var htmlDoc = web.Load(@"https://lyceum.nstu.ru/rasp/schedule.html");
@@ -33,7 +33,7 @@ namespace TelegaBot.Commands
             return uri;
         }
 
-        private string GetTimetable()
+        private static string GetTimetable()
         {
             using var siteClient = new HttpClient();
             var timetable = siteClient.GetStringAsync(@"https://lyceum.nstu.ru/rasp/" + _lastActiveUri).Result
@@ -47,28 +47,27 @@ namespace TelegaBot.Commands
 
         #region Commands block
 
-        public async Task<Message> ShowTimetableSelector(ITelegramBotClient client, Message message,
+        public static async Task<Message> ShowTimetableSelector(ITelegramBotClient client, Message message,
             ActionType actionType)
         {
             return await client.ToMessageAsync(message, "Выберите день недели:",
-                actionType, AnnouncementType.Regular,
+                actionType,
                 keyboardMarkup: MarkupConstructor.CreateMarkup(3, 2, DayOfWeeks, "timetable",
                     new Dictionary<string, string>() { { "timetable6", "Сегодня" } }));
         }
 
-        public async Task<Message> ShowTimetable(ITelegramBotClient client, CallbackQuery callbackQuery)
+        public static async Task<Message> ShowTimetable(ITelegramBotClient client, CallbackQuery callbackQuery)
         {
             if (_lastActiveUri != GetUri())
             {
                 _lastActiveUri = GetUri();
                 await client.ToMessageAsync(callbackQuery.Message, "Подождите...",
-                    ActionType.EditText, AnnouncementType.Regular,
+                    ActionType.EditText,
                     keyboardMarkup: MarkupConstructor.CreateMarkup());
                 Console.WriteLine("Отпарсено заново");
                 _timetable = JsonConvert.DeserializeObject<Dictionary<string, JToken>>(GetTimetable());
             }
 
-            // const string path = "50";
             var flag = true;
             var lesson = 1;
             var callbackQueryDataNumber = int.Parse(callbackQuery.Data.Substring("timetable".Length)) != 6
@@ -108,7 +107,7 @@ namespace TelegaBot.Commands
             }
 
             return await client.ToMessageAsync(callbackQuery.Message, result,
-                ActionType.EditText, AnnouncementType.Regular,
+                ActionType.EditText,
                 keyboardMarkup: MarkupConstructor.CreateMarkup(
                     new Dictionary<string, string>() { { "timetableBack", "Назад" } }));
         }

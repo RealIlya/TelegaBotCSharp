@@ -14,16 +14,16 @@ namespace TelegaBot.Commands
 {
     public class OtherCommands
     {
-        private readonly Random _random = new Random();
+        private static readonly Random _random = new Random();
 
-        private readonly List<Student> _students;
+        private static readonly List<Student> _students;
 
-        private int _lastSeenDay;
+        private static int _lastSeenDay;
 
-        private List<Student> _todayDuties;
+        private static List<Student> _todayDuties;
 
 
-        public OtherCommands()
+        static OtherCommands()
         {
             _lastSeenDay = DateTime.Today.Day;
 
@@ -37,7 +37,7 @@ namespace TelegaBot.Commands
             };
         }
 
-        public async Task<Message> ShowHelp(ITelegramBotClient client, Message message)
+        public static async Task<Message> ShowHelp(ITelegramBotClient client, Message message)
         {
             return await client.ToMessageAsync(message,
                 "<b>Для просмотра дежурных</b> - /work\n" +
@@ -48,10 +48,10 @@ namespace TelegaBot.Commands
                 "<b>Параметры без запятых.</b>\n\n" +
                 "<b>Сохранить домашнее задание в бота</b> -\n" +
                 "/newhw <i>предмет, дата (или сегодня), день недели (или сегодня), приложить картинку</i>",
-                ActionType.SendText, AnnouncementType.Regular);
+                ActionType.SendText);
         }
 
-        public async Task<Message> ShowDuty(ITelegramBotClient client, Message message)
+        public static async Task<Message> ShowDuty(ITelegramBotClient client, Message message)
         {
             var presentDay = DateTime.Today.Day;
             if (_lastSeenDay != presentDay)
@@ -67,53 +67,58 @@ namespace TelegaBot.Commands
 
             return await client.ToMessageAsync(message,
                 $"Дежурят сегодня - <b>{string.Join(" и ", _todayDuties)}</b>",
-                ActionType.SendText, AnnouncementType.Regular);
+                ActionType.SendText);
         }
 
-        public async Task<Message> ShowTime(ITelegramBotClient client, Message message)
+        public static async Task<Message> ShowTime(ITelegramBotClient client, Message message)
         {
             return await client.ToMessageAsync(message,
-                $"Дата: <b>{DateTime.Now.ToString($"d-M-yyyy")}</b>\n" +
+                $"Дата: <b>{DateTime.Now.ToString($"d.M.yyyy")}</b>\n" +
                 $"Время <b>{DateTime.Now.ToString($"H:m:s")}</b>",
-                ActionType.SendText, AnnouncementType.Regular);
+                ActionType.SendText);
         }
 
 
-        public Task<Message> ShowBlackFrame(ITelegramBotClient client, Message message)
+        public static Task<Message> ShowBlackFrame(ITelegramBotClient client, Message message)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<Message> Echo(ITelegramBotClient client, Message message, List<string> textList)
+        public static async Task<Message> Echo(ITelegramBotClient client, Message message, List<string> textList)
         {
             if (textList.Count < 3)
                 return await client.ToMessageAsync(message,
-                    "Слишком мало аргументов, образец: /echo <i>продолжительность задержка слово</i>",
+                    "Слишком мало аргументов, образец:\n" +
+                    "/echo <i>продолжительность задержка слово</i>",
                     ActionType.SendText, AnnouncementType.Info);
+            
+            var errorMessage = ((int.TryParse(textList.First(), out int checkDuration) && checkDuration <= 100),
+                    (int.TryParse(textList[1], out int checkDelay) && checkDelay <= 10000),
+                    (string.Join("", textList) is { Length: <= 100 })) switch
+                {
+                    (false, _, _) => client.ToMessageAsync(message,
+                        "Продолжительность > 100 мс",
+                        ActionType.SendText, AnnouncementType.Error),
+                    (_, false, _) => client.ToMessageAsync(message,
+                        "Задержка > 10000 мс",
+                        ActionType.SendText, AnnouncementType.Error),
+                    (_, _, false) => client.ToMessageAsync(message,
+                        "Слово содержит > 100 букв",
+                        ActionType.SendText, AnnouncementType.Error),
+                    _ => null
+                };
 
-            if (!int.TryParse(textList.First(), out int checkDuration) || checkDuration > 100)
-                return await client.ToMessageAsync(message,
-                    "Продолжительность > 100 мс",
-                    ActionType.SendText, AnnouncementType.Error);
-
-            if (!int.TryParse(textList[1], out int checkDelay) || checkDelay > 10000)
-                return await client.ToMessageAsync(message,
-                    "Задержка > 10000 мс",
-                    ActionType.SendText, AnnouncementType.Error);
+            if (errorMessage != null)
+                return await errorMessage;
 
             var duration = int.Parse(textList.Pop(0));
             var delay = int.Parse(textList.Pop(0));
 
-            if (string.Join("", textList) is { Length: > 100 })
-                return await client.ToMessageAsync(message,
-                    "Слово содержит > 100 букв",
-                    ActionType.SendText, AnnouncementType.Error);
-
             for (int i = 0; i < duration; i++)
             {
                 await Task.Delay(delay);
-                await client.ToMessageAsync(message, string.Join(" ", textList),
-                    ActionType.SendText, AnnouncementType.Regular);
+                await client.ToMessageAsync(message, string.Join("", textList),
+                    ActionType.SendText);
             }
 
             return null;
