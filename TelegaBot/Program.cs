@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading;
+using System.Threading.Tasks;
 using TelegaBot.BotStuff;
-using TelegaBot.Commands;
-using TelegaBot.Models;
 using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 
@@ -12,10 +11,10 @@ namespace TelegaBot
     {
         private static TelegramBotClient _client;
 
-        private static void Start()
+        public async static Task Main(string[] args)
         {
-            _client = new TelegramBotClient("2025956416:AAEcQdq_n-9hQBM3aNUCLDQYEU5JSBkeFLg");
-            var me = _client.GetMeAsync().Result;
+            _client = new TelegramBotClient("Token");
+            var me = await _client.GetMeAsync();
             Console.Title = me.Username;
 
             using var cts = new CancellationTokenSource();
@@ -27,11 +26,6 @@ namespace TelegaBot
             Console.ReadLine();
 
             cts.Cancel();
-        }
-
-        public static void Main(string[] args)
-        {
-            Start();
         }
     }
 }

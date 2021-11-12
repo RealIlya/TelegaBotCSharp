@@ -84,11 +84,12 @@ namespace TelegaBot.BotStuff
                 "/work" => OtherCommands.ShowDuty(client, message),
                 "/time" => OtherCommands.ShowTime(client, message),
                 "/timetable" => TimetableCommands.ShowTimetableSelector(client, message, ActionType.SendText),
-                "/black" => OtherCommands.ShowBlackFrame(client, message),
+                "/black" => OtherCommands.ShowBlack(client, message, textList),
                 "/hw" => HomeworkCommands.ShowSubjectSelector(client, message, ActionType.SendText),
                 "/newhw" => HomeworkCommands.NewHomework(client, message, textList),
                 "/echo" => OtherCommands.Echo(client, message, textList),
                 "/allhw" => HomeworkCommands.ShowAllHomework(client, message),
+                "/insult" => OtherCommands.Insult(client, message, textList),
                 _ => null
             };
 
@@ -129,7 +130,7 @@ namespace TelegaBot.BotStuff
                     _ => null
                 };
 
-            await answer;
+            if (answer != null) await answer;
         }
 
         private static Task UnknownUpdateHandler(ITelegramBotClient client, Update update)

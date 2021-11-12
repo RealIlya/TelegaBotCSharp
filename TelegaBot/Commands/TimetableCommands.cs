@@ -103,10 +103,11 @@ namespace TelegaBot.Commands
                 result +=
                     $"{lesson++}. {string.Join(" / ", subjects)}({string.Join(" / ", rooms)})\n" +
                     $"    {string.Join(" / ", teachers)}\n";
-                flag = false;
+                if (flag) flag = false;
             }
 
-            return await client.ToMessageAsync(callbackQuery.Message, result,
+            return await client.ToMessageAsync(callbackQuery.Message, 
+                result,
                 ActionType.EditText,
                 keyboardMarkup: MarkupConstructor.CreateMarkup(
                     new Dictionary<string, string>() { { "timetableBack", "Назад" } }));

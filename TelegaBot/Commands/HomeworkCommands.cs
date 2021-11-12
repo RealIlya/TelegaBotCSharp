@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -34,13 +33,14 @@ namespace TelegaBot.Commands
             };
         }
 
-        #region Commands
+        #region Commands block
 
         public static async Task<Message> ShowSubjectSelector(ITelegramBotClient client, Message message,
             ActionType actionType, bool deletePreviousMessage = false)
         {
             return _homeworks.Count > 0
-                ? await client.ToMessageAsync(message, "Выберите предмет:",
+                ? await client.ToMessageAsync(message,
+                    "Выберите предмет:",
                     actionType, deletePreviousMessage,
                     keyboardMarkup: MarkupConstructor.CreateMarkup(4, 3, Subjects, "subject"))
                 : await client.ToMessageAsync(message,
@@ -93,7 +93,7 @@ namespace TelegaBot.Commands
                         return await client.ToMessageAsync(callbackQuery.Message,
                             $"Были найдены домашние задания по предмету {homework.Subject} за {homework.DayOfWeek}.\n" +
                             "Выберите число:",
-                            actionType, homework.MessageId, deletePreviousMessage, 
+                            actionType, deletePreviousMessage, homework.MessageId,
                             keyboardMarkup: MarkupConstructor.CreateMarkup(intersections.Count / 2, 2,
                                 intersections.Select(intersection => intersection.Date).ToList(), "intersection",
                                 new() { { "homeworkBack", "К началу" } }));
@@ -107,7 +107,7 @@ namespace TelegaBot.Commands
 
                     return await client.ToMessageAsync(callbackQuery.Message,
                         $"Домашнее задание по {homework.Subject.Substring(0, homework.Subject.Length - 1) + "е"} за {homework.DayOfWeek}",
-                        actionType, replyToMessageId: homework.MessageId, deletePreviousMessage, 
+                        actionType, deletePreviousMessage, replyToMessageId: homework.MessageId,
                         keyboardMarkup: MarkupConstructor.CreateMarkup(
                             new() { { "homeworkBack", "К началу" } }));
                 }
@@ -119,7 +119,7 @@ namespace TelegaBot.Commands
 
         public static async Task<Message> ShowAllHomework(ITelegramBotClient client, Message message)
         {
-            return await client.ToMessageAsync(message, 
+            return await client.ToMessageAsync(message,
                 _homeworks.Count > 0 ? string.Join("\n", _homeworks) : _haveNotHomework,
                 ActionType.SendText);
         }
@@ -128,46 +128,14 @@ namespace TelegaBot.Commands
         {
             if (message.Photo == null)
                 return await client.ToMessageAsync(message,
-                    "Картинка не приложенп",
+                    HaveNotAPhoto,
                     ActionType.SendText, AnnouncementType.Error);
 
             if (textList.Count < 2)
                 return await client.ToMessageAsync(message,
-                    "Слишком мало аргументов, образец:\n" +
+                    NotEnoughArguments +
                     "/newhw <i>предмет, дата (или сегодня), день недели (или сегодня), приложить картинку</i>",
                     ActionType.SendText, AnnouncementType.Error);
-
-            // var subject = textList.First().ToTitle();
-            // if (!Subjects.Contains(subject))
-            // {
-            //     return await client.ToMessageAsync(message,
-            //         "Предмет указан неправильно",
-            //         ActionType.SendText, AnnouncementType.Error);
-            // }
-            //
-            // string dayOfWeek = textList.Middle();
-            // if (dayOfWeek != "н")
-            // {
-            //     if (!DayOfWeeks.Contains(dayOfWeek.ToTitle()))
-            //     {
-            //         return await client.ToMessageAsync(message,
-            //             "День недели указан неправильно",
-            //             ActionType.SendText, AnnouncementType.Error);
-            //     }
-            // }
-            // else dayOfWeek = DayOfWeeks[Utilities.GetDayOfWeek() - 1];
-            //
-            // var date = textList.Last();
-            // if (date != "н")
-            // {
-            //     if (!DateTime.TryParse(date, out DateTime checkDate))
-            //     {
-            //         return await client.ToMessageAsync(message,
-            //             "Дата указана неправильно",
-            //             ActionType.SendText, AnnouncementType.Error);
-            //     }
-            // }
-            // else date = DateTime.Now.ToString($"d.M.yyyy");
 
             var subject = textList.First().ToTitle();
             var dayOfWeek = textList.Middle() == "н" ? DayOfWeeks[Utilities.GetDayOfWeek() - 1] : textList[1].ToTitle();
@@ -189,7 +157,7 @@ namespace TelegaBot.Commands
                     _ => null
                 };
 
-            if (errorMessage != null) 
+            if (errorMessage != null)
                 return await errorMessage;
 
             _notCheckedHomework = new Homework(subject, dayOfWeek, date, message.MessageId, message.Chat.Id);

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegaBot.BotStuff
@@ -25,7 +26,7 @@ namespace TelegaBot.BotStuff
             if (optionalButtons != null) 
                 AddOptionalButtons(keyboard, optionalButtons);
 
-            keyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.WithCallbackData("Закрыть", "close") });
+            AddRequierdButtons(keyboard);
             return new InlineKeyboardMarkup(keyboard);
         }
 
@@ -36,12 +37,11 @@ namespace TelegaBot.BotStuff
             if (optionalButtons != null) 
                 AddOptionalButtons(keyboard, optionalButtons);
 
-            keyboard.Add(new List<InlineKeyboardButton>()
-                { InlineKeyboardButton.WithCallbackData("Закрыть", "close") });
+            AddRequierdButtons(keyboard);
             return new InlineKeyboardMarkup(keyboard);
         }
 
-        private static void AddOptionalButtons(ICollection<List<InlineKeyboardButton>> keyboard,
+        private static void AddOptionalButtons(ICollection<List<InlineKeyboardButton>> keyboard, 
             Dictionary<string, string> optionalButtons)
         {
             foreach (var item in optionalButtons)
@@ -49,6 +49,11 @@ namespace TelegaBot.BotStuff
                 keyboard.Add(new List<InlineKeyboardButton>()
                     { InlineKeyboardButton.WithCallbackData(item.Value, item.Key) });
             }
+        }
+
+        private static void AddRequierdButtons(List<List<InlineKeyboardButton>> keyboard)
+        {
+            keyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.WithCallbackData("Закрыть", "close") });
         }
     }
 }

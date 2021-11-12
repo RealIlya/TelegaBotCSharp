@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -10,9 +10,7 @@ namespace TelegaBot.BotStuff
     public enum AnnouncementType
     {
         Error,
-        Warning,
         Info,
-        Regular
     }
 
     public enum ActionType
@@ -23,160 +21,70 @@ namespace TelegaBot.BotStuff
 
     public static class Announcement
     {
-        public static async Task<Message> ToMessageAsync(this ITelegramBotClient client, Message message, string text,
-            ActionType actionType, AnnouncementType announcementType, int replyToMessageId,
-            bool deletePreviousMessage = false, InlineKeyboardMarkup keyboardMarkup = null)
-        {
-            keyboardMarkup ??= MarkupConstructor.CreateMarkup();
-
-            if (deletePreviousMessage)
-            {
-                await client.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-            }
-
-            var notification = actionType switch
-            {
-                ActionType.SendText => announcementType switch
-                {
-                    AnnouncementType.Error => client.SendTextMessageAsync(message.Chat.Id,
-                        $"<b><u>{text}</u></b>", replyMarkup: keyboardMarkup,
-                        replyToMessageId: replyToMessageId,
-                        parseMode: ParseMode.Html),
-                    AnnouncementType.Warning => client.SendTextMessageAsync(message.Chat.Id,
-                        $"<b>{text}</b>", replyMarkup: keyboardMarkup,
-                        replyToMessageId: replyToMessageId,
-                        parseMode: ParseMode.Html),
-                    AnnouncementType.Info => client.SendTextMessageAsync(message.Chat.Id,
-                        $"<b>{text}</b>", replyMarkup: keyboardMarkup,
-                        replyToMessageId: replyToMessageId,
-                        parseMode: ParseMode.Html),
-                    AnnouncementType.Regular => client.SendTextMessageAsync(message.Chat.Id,
-                        text, replyMarkup: keyboardMarkup,
-                        replyToMessageId: replyToMessageId,
-                        parseMode: ParseMode.Html),
-                    _ => null
-                },
-                ActionType.EditText => announcementType switch
-                {
-                    AnnouncementType.Error => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
-                        $"<b><u>{text}</u></b>", replyMarkup: keyboardMarkup,
-                        parseMode: ParseMode.Html),
-                    AnnouncementType.Warning => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
-                        $"<b>{text}</b>", replyMarkup: keyboardMarkup,
-                        parseMode: ParseMode.Html),
-                    AnnouncementType.Info => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
-                        $"<b>{text}</b>", replyMarkup: keyboardMarkup,
-                        parseMode: ParseMode.Html),
-                    AnnouncementType.Regular => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
-                        text, replyMarkup: keyboardMarkup,
-                        parseMode: ParseMode.Html),
-                    _ => null
-                },
-                _ => null
-            };
-
-            return await notification;
-        }
-
-        public static async Task<Message> ToMessageAsync(this ITelegramBotClient client, Message message, string text,
-            ActionType actionType, AnnouncementType announcementType,
-            bool deletePreviousMessage = false, InlineKeyboardMarkup keyboardMarkup = null)
-        {
-            keyboardMarkup ??= MarkupConstructor.CreateMarkup();
-
-            if (deletePreviousMessage)
-            {
-                await client.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-            }
-
-            var notification = actionType switch
-            {
-                ActionType.SendText => announcementType switch
-                {
-                    AnnouncementType.Error => client.SendTextMessageAsync(message.Chat.Id,
-                        $"<b><u>{text}</u></b>", replyMarkup: keyboardMarkup,
-                        parseMode: ParseMode.Html),
-                    AnnouncementType.Warning => client.SendTextMessageAsync(message.Chat.Id,
-                        $"<b>{text}</b>", replyMarkup: keyboardMarkup,
-                        parseMode: ParseMode.Html),
-                    AnnouncementType.Info => client.SendTextMessageAsync(message.Chat.Id,
-                        $"<b>{text}</b>", replyMarkup: keyboardMarkup,
-                        parseMode: ParseMode.Html),
-                    AnnouncementType.Regular => client.SendTextMessageAsync(message.Chat.Id,
-                        text, replyMarkup: keyboardMarkup,
-                        parseMode: ParseMode.Html),
-                    _ => null
-                },
-                ActionType.EditText => announcementType switch
-                {
-                    AnnouncementType.Error => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
-                        $"<b><u>{text}</u></b>", replyMarkup: keyboardMarkup,
-                        parseMode: ParseMode.Html),
-                    AnnouncementType.Warning => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
-                        $"<b>{text}</b>", replyMarkup: keyboardMarkup,
-                        parseMode: ParseMode.Html),
-                    AnnouncementType.Info => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
-                        $"<b>{text}</b>", replyMarkup: keyboardMarkup,
-                        parseMode: ParseMode.Html),
-                    AnnouncementType.Regular => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
-                        text, replyMarkup: keyboardMarkup,
-                        parseMode: ParseMode.Html),
-                    _ => null
-                },
-                _ => null
-            };
-
-            return await notification;
-        }
-
-        public static async Task<Message> ToMessageAsync(this ITelegramBotClient client, Message message, string text,
-            ActionType actionType, int replyToMessageId, bool deletePreviousMessage = false,
+        public static async Task<Message> ToMessageAsync(
+            this ITelegramBotClient client,
+            Message message,
+            string text,
+            ActionType actionType,
+            AnnouncementType? announcementType,
+            bool deletePreviousMessage = false,
+            int? replyToMessageId = null,
             InlineKeyboardMarkup keyboardMarkup = null)
         {
+            await DeletePreviousMessage(client, message, deletePreviousMessage);
+
+            return await Sender(client, message, text, actionType, announcementType, replyToMessageId, keyboardMarkup);
+        }
+
+        public static async Task<Message> ToMessageAsync(this ITelegramBotClient client,
+            Message message,
+            string text,
+            ActionType actionType,
+            bool deletePreviousMessage = false,
+            int? replyToMessageId = null,
+            InlineKeyboardMarkup keyboardMarkup = null)
+        {
+            await DeletePreviousMessage(client, message, deletePreviousMessage);
+
+            return await Sender(client, message, text, actionType, null, replyToMessageId, keyboardMarkup);
+        }
+
+        private static Task<Message> Sender(ITelegramBotClient client, Message message, string text,
+            ActionType actionType, AnnouncementType? announcementType, int? replyToMessageId,
+            InlineKeyboardMarkup keyboardMarkup)
+        {
             keyboardMarkup ??= MarkupConstructor.CreateMarkup();
 
-            if (deletePreviousMessage)
-            {
-                await client.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-            }
-
-            var notification = actionType switch
+            return actionType switch
             {
                 ActionType.SendText => client.SendTextMessageAsync(message.Chat.Id,
-                    text, replyMarkup: keyboardMarkup,
+                    WhatAnnouncementType(announcementType, text),
+                    replyMarkup: keyboardMarkup,
                     replyToMessageId: replyToMessageId,
                     parseMode: ParseMode.Html),
                 ActionType.EditText => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
-                    text, replyMarkup: keyboardMarkup,
+                    WhatAnnouncementType(announcementType, text),
+                    replyMarkup: keyboardMarkup,
                     parseMode: ParseMode.Html),
                 _ => null
             };
-
-            return await notification;
         }
 
-        public static async Task<Message> ToMessageAsync(this ITelegramBotClient client, Message message, string text,
-            ActionType actionType, bool deletePreviousMessage = false, InlineKeyboardMarkup keyboardMarkup = null)
+        private async static Task DeletePreviousMessage(ITelegramBotClient client, Message message,
+            bool deletePreviousMessage)
         {
-            keyboardMarkup ??= MarkupConstructor.CreateMarkup();
-
             if (deletePreviousMessage)
-            {
                 await client.DeleteMessageAsync(message.Chat.Id, message.MessageId);
-            }
+        }
 
-            var notification = actionType switch
+        private static string WhatAnnouncementType(AnnouncementType? announcementType, string text)
+        {
+            return announcementType switch
             {
-                ActionType.SendText => client.SendTextMessageAsync(message.Chat.Id,
-                    text, replyMarkup: keyboardMarkup,
-                    parseMode: ParseMode.Html),
-                ActionType.EditText => client.EditMessageTextAsync(message.Chat.Id, message.MessageId,
-                    text, replyMarkup: keyboardMarkup,
-                    parseMode: ParseMode.Html),
-                _ => null
+                AnnouncementType.Error => $"<b><u>{text}</u></b>",
+                AnnouncementType.Info => $"<b>{text}</b>",
+                _ => text
             };
-
-            return await notification;
         }
     }
 }

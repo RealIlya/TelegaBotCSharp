@@ -1,4 +1,6 @@
-﻿namespace TelegaBot.Models
+﻿using TelegaBot.BotStuff;
+
+namespace TelegaBot.Models
 {
     public record Homework
     {

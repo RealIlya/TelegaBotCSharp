@@ -14,5 +14,8 @@ namespace TelegaBot.BotStuff
             "Химия", "Инженерная графика", "Биология",
             "История", "Обществознание", "География"
         };
+
+        protected const string HaveNotAPhoto = "Картинка не приложена\n";
+        protected const string NotEnoughArguments = "Слишком мало аргументов, образец:\n";
     }
 }
