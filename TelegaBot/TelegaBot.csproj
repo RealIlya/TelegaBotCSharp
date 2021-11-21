@@ -13,6 +13,7 @@
         <FileAlignment>512</FileAlignment>
         <LangVersion>9</LangVersion>
         <Nullable>disable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -34,8 +35,24 @@
         <WarningLevel>4</WarningLevel>
     </PropertyGroup>
     <ItemGroup>
+        <Reference Include="DirectShowLib, Version=2.1.0.1599, Culture=neutral, PublicKeyToken=null">
+          <HintPath>..\packages\DirectShowLib.1.0.0\lib\DirectShowLib.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="Emgu.CV.Platform.NetStandard, Version=4.5.4.4788, Culture=neutral, PublicKeyToken=7281126722ab4438">
+          <HintPath>..\packages\Emgu.CV.4.5.4.4788\lib\netstandard2.0\Emgu.CV.Platform.NetStandard.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
         <Reference Include="HtmlAgilityPack, Version=1.11.37.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a">
           <HintPath>..\packages\HtmlAgilityPack.1.11.37\lib\Net45\HtmlAgilityPack.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="ImageProcessor, Version=2.8.0.152, Culture=neutral, PublicKeyToken=null">
+          <HintPath>..\packages\ImageProcessor.2.8.0\lib\net452\ImageProcessor.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="ImageProcessor.Plugins.WebP, Version=1.3.0.152, Culture=neutral, PublicKeyToken=null">
+          <HintPath>..\packages\ImageProcessor.Plugins.WebP.1.3.0\lib\net452\ImageProcessor.Plugins.WebP.dll</HintPath>
           <Private>True</Private>
         </Reference>
         <Reference Include="mscorlib" />
@@ -48,6 +65,10 @@
         <Reference Include="System.Core" />
         <Reference Include="System.Data" />
         <Reference Include="System.Drawing" />
+        <Reference Include="System.Drawing.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+          <HintPath>..\packages\System.Drawing.Primitives.4.3.0\lib\net45\System.Drawing.Primitives.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
         <Reference Include="System.IO, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
           <HintPath>..\packages\System.IO.4.3.0\lib\net462\System.IO.dll</HintPath>
           <Private>True</Private>
@@ -56,12 +77,16 @@
           <HintPath>..\packages\System.Net.Http.4.3.4\lib\net46\System.Net.Http.dll</HintPath>
           <Private>True</Private>
         </Reference>
-        <Reference Include="System.Runtime, Version=4.1.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-          <HintPath>..\packages\System.Runtime.4.3.0\lib\net462\System.Runtime.dll</HintPath>
+        <Reference Include="System.Runtime, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+          <HintPath>..\packages\System.Runtime.4.3.1\lib\net462\System.Runtime.dll</HintPath>
           <Private>True</Private>
         </Reference>
         <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
           <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+        <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+          <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
           <Private>True</Private>
         </Reference>
         <Reference Include="System.Security.Cryptography.Algorithms, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
@@ -90,7 +115,7 @@
         </Reference>
         <Reference Include="System.Xml" />
         <Reference Include="Telegram.Bot, Version=17.0.0.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\packages\Telegram.Bot.17.0.0-alpha.3\lib\netstandard2.0\Telegram.Bot.dll</HintPath>
+          <HintPath>..\packages\Telegram.Bot.17.0.0-alpha.5\lib\netstandard2.0\Telegram.Bot.dll</HintPath>
           <Private>True</Private>
         </Reference>
         <Reference Include="Telegram.Bot.Extensions.Polling, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null">
@@ -99,17 +124,26 @@
         </Reference>
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="BotStuff\GlobalConstants.cs" />
+        <Compile Include="AnswerCallbacks\ShowTimetableAnswer.cs" />
+        <Compile Include="AnswerCallbacks\ShowTimetableSelectorAnswer.cs" />
+        <Compile Include="BotStuff\GlData.cs" />
+        <Compile Include="BotStuff\HwData.cs" />
         <Compile Include="BotStuff\MarkupConstructor.cs" />
         <Compile Include="BotStuff\Announcement.cs" />
         <Compile Include="BotStuff\Handlers.cs" />
+        <Compile Include="BotStuff\PhotoProcessing.cs" />
         <Compile Include="BotStuff\Utilities.cs" />
-        <Compile Include="Commands\Command.cs" />
+        <Compile Include="Commands\EchoCommand.cs" />
         <Compile Include="Commands\HomeworkCommands.cs" />
-        <Compile Include="Commands\ICommand.cs" />
-        <Compile Include="Commands\ICommands.cs" />
-        <Compile Include="Commands\OtherCommands.cs" />
-        <Compile Include="Commands\TimetableCommands.cs" />
+        <Compile Include="Commands\InsultCommand.cs" />
+        <Compile Include="Commands\RunCommand.cs" />
+        <Compile Include="Commands\ShowBlackCommand.cs" />
+        <Compile Include="Commands\ShowDutyCommand.cs" />
+        <Compile Include="Commands\ShowHelpCommand.cs" />
+        <Compile Include="Commands\ShowTimeCommand.cs" />
+        <Compile Include="Commands\ShowTimetableSelectorCommand.cs" />
+        <Compile Include="Interfaces\IAnswer.cs" />
+        <Compile Include="Interfaces\ICommand.cs" />
         <Compile Include="Models\Homework.cs" />
         <Compile Include="Models\Student.cs" />
         <Compile Include="Program.cs" />

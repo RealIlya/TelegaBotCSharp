@@ -5,12 +5,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using TelegaBot.AnswerCallbacks;
 using TelegaBot.Commands;
+using TelegaBot.Interfaces;
 using TelegaBot.Models;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Extensions.Polling;
+using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
@@ -22,6 +25,28 @@ namespace TelegaBot.BotStuff
         private static readonly List<string> _TimetableCallbacks;
         private static readonly List<string> _SubjectCallbacks;
         private static readonly List<string> _DayOfWeekCallbacks;
+
+        private static readonly Dictionary<string, ICommand> _Commands = new()
+        {
+            { "/help", new ShowHelpCommand() },
+            { "/work", new ShowDutyCommand() },
+            { "/time", new ShowTimeCommand() },
+            { "/timetable", new ShowTimetableSelectorCommand() },
+            // { "/hw", null },
+            // { "newhw", null },
+
+            { "/echo", new EchoCommand() },
+            { "/black", new ShowBlackCommand() },
+            { "/insult", new InsultCommand() },
+
+            // { "/allhw", null }
+        };
+
+        private static readonly Dictionary<string, IAnswer> _AnswerCallbacks = new()
+        {
+            { string.Join("", Enumerable.Range(0, 7).Select(n => $"timetable{n}")), new ShowTimetableAnswer() },
+            { "timetableBack", new ShowTimetableSelectorAnswer() }
+        };
 
         static Handlers()
         {
@@ -57,8 +82,6 @@ namespace TelegaBot.BotStuff
                 UpdateType.Message => OnMessageReceived(client, update.Message),
                 UpdateType.EditedMessage => OnMessageReceived(client, update.EditedMessage),
                 UpdateType.CallbackQuery => OnCallbackQueryReceived(client, update.CallbackQuery),
-                // UpdateType.InlineQuery => BotOnInlineQueryReceived(botClient, update.InlineQuery),
-                // UpdateType.ChosenInlineResult => OnChosenInlineResultReceived(botClient, update.ChosenInlineResult),
                 _ => UnknownUpdateHandler(client, update)
             };
 
@@ -78,55 +101,103 @@ namespace TelegaBot.BotStuff
             if (messageText?.FirstOrDefault() != '/') return;
             var textList = messageText.Split(' ').ToList();
 
-            var command = textList.Pop(0).Split('@').First() switch
+            Task<Message> command;
+
+            var commandString = textList.Pop(0).Split('@').First();
+            if (_Commands[_Commands.ContainsKey(commandString) ? commandString : "/help"]
+                .CanExecute(message, out (string text, AnnouncementType type) error))
             {
-                "/help" => OtherCommands.ShowHelp(client, message),
-                "/work" => OtherCommands.ShowDuty(client, message),
-                "/time" => OtherCommands.ShowTime(client, message),
-                "/timetable" => TimetableCommands.ShowTimetableSelector(client, message, ActionType.SendText),
-                "/black" => OtherCommands.ShowBlack(client, message, textList),
-                "/hw" => HomeworkCommands.ShowSubjectSelector(client, message, ActionType.SendText),
+                command = _Commands[commandString].Execute(client, message);
+            }
+            else
+            {
+                command = client.ToMessageAsync(message, error.text, ActionType.SendText, error.type);
+            }
+
+            /*
+            command = textList.Pop(0).Split('@').First() switch
+            {
+                // "/help" => OtherCommands.ShowHelp(client, message),
+                // "/work" => OtherCommands.ShowDuty(client, message),
+                // "/time" => OtherCommands.ShowTime(client, message),
+                // "/timetable" => TimetableCommands.ShowTimetableSelector(client, message),
+                // "/black" => OtherCommands.ShowBlack(client, message, textList),
+                "/hw" => HomeworkCommands.ShowSubjectSelector(client, message),
                 "/newhw" => HomeworkCommands.NewHomework(client, message, textList),
-                "/echo" => OtherCommands.Echo(client, message, textList),
+                // "/echo" => OtherCommands.Echo(client, message, textList),
                 "/allhw" => HomeworkCommands.ShowAllHomework(client, message),
-                "/insult" => OtherCommands.Insult(client, message, textList),
+                // "/insult" => OtherCommands.Insult(client, message, textList),
                 _ => null
             };
+            */
 
             if (command != null) await command;
         }
 
-        private static async Task OnCallbackQueryReceived(ITelegramBotClient client,
-            CallbackQuery callbackQuery)
+        private static async Task OnCallbackQueryReceived(ITelegramBotClient client, CallbackQuery callbackQuery)
         {
-            Task answer;
+            var message = callbackQuery.Message;
+            var callbackData = callbackQuery.Data ?? String.Empty;
 
-            if (_TimetableCallbacks.Contains(callbackQuery.Data))
+            Task answer = null;
+
+            if (callbackData != "close")
             {
-                answer = TimetableCommands.ShowTimetable(client, callbackQuery);
+                foreach (var callbacksKey in _AnswerCallbacks.Keys
+                    .Where(callbacksKey => callbacksKey.Contains(callbackData)))
+                {
+                    if (_AnswerCallbacks[callbacksKey]
+                        .CanExecute(callbackQuery, out (string text, AnnouncementType type) error))
+                    {
+                        answer = _AnswerCallbacks[callbacksKey].Execute(client, callbackQuery);
+                        break;
+                    }
+
+                    answer = client.ToMessageAsync(message, error.text, ActionType.SendText, error.type);
+                }
             }
-            else if (_SubjectCallbacks.Contains(callbackQuery.Data))
+            else
             {
-                answer = HomeworkCommands.ShowDayOfWeekSelector(client, callbackQuery, ActionType.EditText);
+                answer = client.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            }
+
+            // foreach (var answerCallbacksKey in _AnswerCallbacks.Keys)
+            // {
+            //     foreach (var element in answerCallbacksKey)
+            //     {
+            //         if (callbackQuery.Data == element)
+            //         {
+            //             answer = _AnswerCallbacks[answerCallbacksKey].Execute(client, callbackQuery);
+            //             break;
+            //         }
+            //
+            //         if (callbackQuery.Data == "timetableBack")
+            //         {
+            //             answer
+            //         }
+            //     }
+            // }
+
+
+            if (_SubjectCallbacks.Contains(callbackQuery.Data))
+            {
+                answer = HomeworkCommands.ShowDayOfWeekSelector(client, callbackQuery);
             }
             else if (_DayOfWeekCallbacks.Contains(callbackQuery.Data))
             {
-                answer = HomeworkCommands.ShowHomework(client, callbackQuery, ActionType.SendText, true);
+                answer = HomeworkCommands.ShowHomework(client, callbackQuery);
             }
             else
                 answer = callbackQuery.Data switch
                 {
-                    "timetableBack" => TimetableCommands.ShowTimetableSelector(client, callbackQuery.Message,
-                        ActionType.EditText),
-                    "dayOfWeekBack" => HomeworkCommands.ShowSubjectSelector(client, callbackQuery.Message,
-                        ActionType.EditText),
-                    "homeworkBack" => HomeworkCommands.ShowSubjectSelector(client, callbackQuery.Message,
-                        ActionType.SendText, true),
-                    "choice0" => HomeworkCommands.SaveHomework(client, callbackQuery),
+                    // "timetableBack" => TimetableCommands.ShowTimetableSelector(client, callbackQuery.Message),
+                    "dayOfWeekBack" => HomeworkCommands.ShowSubjectSelector(client, callbackQuery.Message),
+                    "homeworkBack" => HomeworkCommands.ShowSubjectSelector(client, callbackQuery.Message),
+                    "choice0" => HomeworkCommands.SaveHomework(client, callbackQuery.Message),
                     "choice1" => client.ToMessageAsync(callbackQuery.Message, "Отменено",
                         ActionType.SendText, AnnouncementType.Info, true),
-                    "close" => client.DeleteMessageAsync(callbackQuery.Message.Chat.Id,
-                        callbackQuery.Message.MessageId),
+                    // "close" => client.DeleteMessageAsync(callbackQuery.Message.Chat.Id,
+                    //     callbackQuery.Message.MessageId),
                     _ => null
                 };
 

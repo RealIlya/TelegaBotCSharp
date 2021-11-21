@@ -13,7 +13,7 @@ namespace TelegaBot
 
         public async static Task Main(string[] args)
         {
-            _client = new TelegramBotClient("Token");
+            _client = new TelegramBotClient("2025956416:AAEeoez-l9oVQvl1rYRak-E3tIEgFrfvi3Y");
             var me = await _client.GetMeAsync();
             Console.Title = me.Username;
 

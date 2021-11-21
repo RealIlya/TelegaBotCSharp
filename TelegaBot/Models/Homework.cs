@@ -1,4 +1,5 @@
-﻿using TelegaBot.BotStuff;
+﻿using System.Collections.Generic;
+using TelegaBot.BotStuff;
 
 namespace TelegaBot.Models
 {
